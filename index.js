@@ -1,7 +1,7 @@
 var url = require("url");
 var Assets = require("./lib/assets");
 
-var connectAssets = module.exports = function (options) {
+var connectAssets = module.exports = function (options, callback) {
   options = parseOptions(options || {});
 
   var assets = new Assets(options);
@@ -14,13 +14,14 @@ var connectAssets = module.exports = function (options) {
   options.helperContext.js = assets.helper(tagWriters.js, "js");
   options.helperContext.assetPath = assets.helper(tagWriters.noop);
 
-  assets.compile(function (err) {
+  assets.compile(function (err, data) {
     if (err) { compilationError = err; }
     compilationComplete = true;
 
     for (var i = 0; i < waiting.length; i++) {
       waiting[i]();
     };
+    callback(err, data);
   });
 
   return function (req, res, next) {
